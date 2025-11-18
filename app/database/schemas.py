@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr
 from datetime import date, datetime
-from typing import Optional
+from typing import Optional, List
 from app.database.models import RuoloEnum, StatoTrasfertaEnum, TipoMezzoEnum
 
 # ============================
@@ -33,7 +33,6 @@ class DipendenteUpdate(BaseModel):
     area_lavoro: Optional[str] = None
     ruolo: Optional[RuoloEnum] = None
     password: Optional[str] = None
-
 
 # ============================
 # TRASFERTA
@@ -70,7 +69,6 @@ class TrasfertaUpdate(BaseModel):
     note_dipendente: Optional[str] = None
     note_segreteria: Optional[str] = None
 
-
 # ============================
 # SPESA
 # ============================
@@ -100,7 +98,6 @@ class SpesaUpdate(BaseModel):
     file_scontrino: Optional[str] = None
     data_spesa: Optional[date] = None
 
-
 # ============================
 # PRENOTAZIONE
 # ============================
@@ -129,3 +126,12 @@ class PrenotazioneUpdate(BaseModel):
     costo: Optional[float] = None
     dettagli: Optional[str] = None
     file_biglietto: Optional[str] = None
+
+# ============================
+# ADMIN SCHEMAS
+# ============================
+class PasswordResetRequest(BaseModel):
+    new_password: str
+
+class RoleUpdateRequest(BaseModel):
+    ruolo: RuoloEnum

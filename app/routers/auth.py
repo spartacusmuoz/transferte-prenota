@@ -37,8 +37,15 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
     to_encode = data.copy()
     expire = datetime.utcnow() + (expires_delta if expires_delta else timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
     to_encode.update({"exp": expire})
+    # Aggiungiamo il ruolo al token
+    if "role" not in to_encode and "sub" in to_encode:
+        db = next(get_db())  # otteniamo sessione db
+        user = db.query(models.Dipendente).filter(models.Dipendente.id == int(to_encode["sub"])).first()
+        if user:
+            to_encode.update({"role": user.ruolo.value})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
+
 
 # =========================
 # LOGIN/REGISTRAZIONE

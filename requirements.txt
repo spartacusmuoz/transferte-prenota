@@ -1,10 +1,22 @@
 fastapi==0.111.1
-uvicorn[standard]==0.23.2
-sqlalchemy==1.4.48
-pydantic==1.10.13
-python-dotenv==1.0.0
+uvicorn[standard]==0.29.0
+
+# ORM
+sqlalchemy==2.0.29
+alembic==1.13.1
+
+# Pydantic (compatibile con FastAPI)
+pydantic==2.7.1
+pydantic-settings==2.2.1
+
+# Password hashing
 passlib[bcrypt]==1.7.4
-python-multipart==0.0.7
-pymysql==1.1.1
-alembic==1.12.0
-python-jose
+
+# JWT
+python-jose==3.3.0
+
+# Upload form-data
+python-multipart==0.0.9
+
+# Env
+python-dotenv==1.0.1
