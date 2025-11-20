@@ -1,11 +1,6 @@
-from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi import Depends, Header, HTTPException, status
 from sqlalchemy.orm import Session
 from app.database import models, session
-from jose import jwt, JWTError
-from app.routers.auth import SECRET_KEY, ALGORITHM
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 # =========================
 # Dipendenza DB
@@ -18,8 +13,28 @@ def get_db():
         db.close()
 
 # =========================
-# Dipendenza per ottenere l'utente corrente dal token
+# MOCK: Dipendenza "utente corrente" senza autenticazione
 # =========================
+# Invia un header 'x-user-id' per simulare l'utente corrente
+def get_current_user(
+    x_user_id: int = Header(default=1),  # default ID=1
+    db: Session = Depends(get_db)
+) -> models.Dipendente:
+    user = db.query(models.Dipendente).filter(models.Dipendente.id == x_user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail=f"Dipendente con id {x_user_id} non trovato")
+    return user
+
+# =========================
+# AUTENTICAZIONE CON JWT (COMMENTATA)
+# =========================
+"""
+from fastapi.security import OAuth2PasswordBearer
+from jose import jwt, JWTError
+from app.routers.auth import SECRET_KEY, ALGORITHM
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -38,6 +53,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     if user is None:
         raise credentials_exception
     return user
+"""
 
 # =========================
 # Dipendenza generica per controllare il ruolo

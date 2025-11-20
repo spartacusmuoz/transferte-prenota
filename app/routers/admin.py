@@ -15,7 +15,26 @@ def get_all_users(
     db: Session = Depends(get_db),
     current_user: models.Dipendente = Depends(require_role(["admin"]))
 ):
+    """
+    Lista tutti gli utenti (solo admin può accedere)
+    """
     return db.query(models.Dipendente).all()
+
+
+# ==============================
+# LISTA DIPENDENTI (pubblico / test senza autenticazione)
+# ==============================
+@router.get("/dipendenti", response_model=List[schemas.DipendenteRead])
+def list_dipendenti(db: Session = Depends(get_db)):
+    """
+    Restituisce tutti i dipendenti.
+    Utile per popolare dropdown nel frontend durante i test.
+    Al momento non richiede autenticazione.
+    In futuro, puoi aggiungere:
+        current_user: models.Dipendente = Depends(require_role(["admin"]))
+    """
+    return db.query(models.Dipendente).all()
+
 
 # ==============================
 # RESET PASSWORD UTENTE
@@ -39,6 +58,7 @@ def reset_user_password(
     db.commit()
     db.refresh(user)
     return user
+
 
 # ==============================
 # MODIFICA RUOLO UTENTE

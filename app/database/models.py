@@ -24,6 +24,15 @@ class TipoMezzoEnum(str, enum.Enum):
     auto = "auto"
     altro = "altro"
 
+
+class TipoScontrinoEnum(str, enum.Enum):
+    aereo = "aereo"
+    treno = "treno"
+    taxi = "taxi"
+    hotel = "hotel"
+    ristorante = "ristorante"
+    altro = "altro"
+
 # =============================
 # MODELS
 # =============================
@@ -71,12 +80,31 @@ class Spesa(Base):
     categoria = Column(String, nullable=False)
     importo = Column(Float, nullable=False)
     valuta = Column(String, default="EUR")
+    tipo_scontrino = Column(Enum(TipoScontrinoEnum), nullable=False)
     file_scontrino = Column(String, nullable=True)
     data_spesa = Column(Date, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     trasferta = relationship("Trasferta", back_populates="spese")
+    files = relationship("SpesaFile", back_populates="spesa")
+
+
+
+class SpesaFile(Base):
+    __tablename__ = "spesa_files"
+
+    id = Column(Integer, primary_key=True, index=True)
+    id_spesa = Column(Integer, ForeignKey("spese.id"), nullable=False)
+
+    filename = Column(String, nullable=False)
+    mimetype = Column(String, nullable=True)
+    data = Column(String, nullable=False)  # base64 per compatibilità SQLite
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    spesa = relationship("Spesa", back_populates="files")
+
 
 class Prenotazione(Base):
     __tablename__ = "prenotazioni"

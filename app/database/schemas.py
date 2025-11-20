@@ -1,7 +1,12 @@
 from pydantic import BaseModel, EmailStr
 from datetime import date, datetime
 from typing import Optional, List
-from app.database.models import RuoloEnum, StatoTrasfertaEnum, TipoMezzoEnum
+from app.database.models import (
+    RuoloEnum,
+    StatoTrasfertaEnum,
+    TipoMezzoEnum,
+    TipoScontrinoEnum,   # <--- nuovo ENUM importato
+)
 
 # ============================
 # DIPENDENTE
@@ -15,7 +20,7 @@ class DipendenteBase(BaseModel):
     ruolo: RuoloEnum = RuoloEnum.dipendente
 
 class DipendenteCreate(DipendenteBase):
-    password: str  # campo in chiaro per la creazione, verrà hashato
+    password: str
 
 class DipendenteRead(DipendenteBase):
     id: int
@@ -69,6 +74,22 @@ class TrasfertaUpdate(BaseModel):
     note_dipendente: Optional[str] = None
     note_segreteria: Optional[str] = None
 
+
+# ============================
+# SPESA - FILE MULTIPLI
+# ============================
+class SpesaFileBase(BaseModel):
+    filename: str
+    mimetype: Optional[str] = None
+    data: str  # base64 del file
+
+class SpesaFileResponse(SpesaFileBase):
+    id: int
+
+    class Config:
+        orm_mode = True
+
+
 # ============================
 # SPESA
 # ============================
@@ -77,7 +98,7 @@ class SpesaBase(BaseModel):
     categoria: str
     importo: float
     valuta: str = "EUR"
-    file_scontrino: Optional[str] = None
+    tipo_scontrino: TipoScontrinoEnum  # <--- nuovo campo
     data_spesa: date
 
 class SpesaCreate(SpesaBase):
@@ -87,6 +108,7 @@ class SpesaRead(SpesaBase):
     id: int
     created_at: datetime
     updated_at: datetime
+    files: List[SpesaFileResponse] = []  # <--- allegati multipli
 
     class Config:
         orm_mode = True
@@ -95,8 +117,9 @@ class SpesaUpdate(BaseModel):
     categoria: Optional[str] = None
     importo: Optional[float] = None
     valuta: Optional[str] = None
-    file_scontrino: Optional[str] = None
+    tipo_scontrino: Optional[TipoScontrinoEnum] = None
     data_spesa: Optional[date] = None
+
 
 # ============================
 # PRENOTAZIONE
@@ -126,6 +149,7 @@ class PrenotazioneUpdate(BaseModel):
     costo: Optional[float] = None
     dettagli: Optional[str] = None
     file_biglietto: Optional[str] = None
+
 
 # ============================
 # ADMIN SCHEMAS
