@@ -20,9 +20,17 @@ app = FastAPI(
 # =========================
 # CORS PER QUASAR
 # =========================
+
+origins = [
+    "http://localhost:9000",
+    "http://127.0.0.1:9000",
+]
+
+
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8080"],  # porta dev server Quasar
+    allow_origins=origins,  # porta dev server Quasar
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
