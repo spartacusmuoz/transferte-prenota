@@ -5,7 +5,6 @@ from app.database.models import (
     RuoloEnum,
     StatoTrasfertaEnum,
     TipoMezzoEnum,
-    TipoScontrinoEnum,   # <--- nuovo ENUM importato
 )
 
 # ============================
@@ -98,7 +97,7 @@ class SpesaBase(BaseModel):
     categoria: str
     importo: float
     valuta: str = "EUR"
-    tipo_scontrino: TipoScontrinoEnum  # <--- nuovo campo
+    tipo_scontrino: str  # <-- cambiato da Enum a stringa
     data_spesa: date
 
 class SpesaCreate(SpesaBase):
@@ -108,7 +107,7 @@ class SpesaRead(SpesaBase):
     id: int
     created_at: datetime
     updated_at: datetime
-    files: List[SpesaFileResponse] = []  # <--- allegati multipli
+    files: List[SpesaFileResponse] = []  # allegati multipli
 
     class Config:
         orm_mode = True
@@ -117,8 +116,9 @@ class SpesaUpdate(BaseModel):
     categoria: Optional[str] = None
     importo: Optional[float] = None
     valuta: Optional[str] = None
-    tipo_scontrino: Optional[TipoScontrinoEnum] = None
+    tipo_scontrino: Optional[str] = None  # <-- cambiato da Enum a stringa
     data_spesa: Optional[date] = None
+
 
 
 # ============================

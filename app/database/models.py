@@ -24,15 +24,6 @@ class TipoMezzoEnum(str, enum.Enum):
     auto = "auto"
     altro = "altro"
 
-
-class TipoScontrinoEnum(str, enum.Enum):
-    aereo = "aereo"
-    treno = "treno"
-    taxi = "taxi"
-    hotel = "hotel"
-    ristorante = "ristorante"
-    altro = "altro"
-
 # =============================
 # MODELS
 # =============================
@@ -80,7 +71,7 @@ class Spesa(Base):
     categoria = Column(String, nullable=False)
     importo = Column(Float, nullable=False)
     valuta = Column(String, default="EUR")
-    tipo_scontrino = Column(Enum(TipoScontrinoEnum), nullable=False)
+    tipo_scontrino = Column(String, default="altro", nullable=False)  # nuova colonna
     file_scontrino = Column(String, nullable=True)
     data_spesa = Column(Date, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -88,8 +79,6 @@ class Spesa(Base):
 
     trasferta = relationship("Trasferta", back_populates="spese")
     files = relationship("SpesaFile", back_populates="spesa")
-
-
 
 class SpesaFile(Base):
     __tablename__ = "spesa_files"
@@ -104,7 +93,6 @@ class SpesaFile(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     spesa = relationship("Spesa", back_populates="files")
-
 
 class Prenotazione(Base):
     __tablename__ = "prenotazioni"

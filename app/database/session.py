@@ -13,7 +13,7 @@ engine = create_engine(
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # ======================================
-# CREA TUTTE LE TABELLE
+# CREA TUTTE LE TABELLE ALL'AVVIO
 # ======================================
 def create_tables():
     import app.database.models
