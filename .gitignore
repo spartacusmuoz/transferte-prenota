@@ -1,5 +1,33 @@
+# Virtual environment
 venv/
+.env
+.env.*
+
+# Python cache
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+
+# SQLite database locali
 *.sqlite3
-.env
+db.sqlite3
+
+# Logs
+*.log
+
+# VSCode / Editor
+.vscode/
+.idea/
+
+# Pytest / Coverage
+.coverage
+htmlcov/
+
+# Build / dist
+build/
+dist/
+*.egg-info/
+
+# Cache generali
+.cache/

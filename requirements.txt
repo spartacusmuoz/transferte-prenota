@@ -5,9 +5,8 @@ uvicorn[standard]==0.29.0
 sqlalchemy==2.0.29
 alembic==1.13.1
 
-# Pydantic (compatibile con FastAPI)
-pydantic==2.7.1
-pydantic-settings==2.2.1
+# Pydantic 1.x (compatibile con Windows senza Rust)
+pydantic==1.10.11
 
 # Password hashing
 passlib[bcrypt]==1.7.4
