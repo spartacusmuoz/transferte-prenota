@@ -1,13 +1,15 @@
 from sqlalchemy.orm import Session
 from typing import List, Optional
-from datetime import date
 import base64
+import shutil
+import os
 
 from app.database import models, schemas
 
-# ------------------------
-# Spesa + SpesaFile CRUD
-# ------------------------
+# =========================
+# Spese CRUD
+# =========================
+
 def create_spesa(db: Session, spesa_in: schemas.SpesaCreate, creator_id: int, files_data: Optional[List[dict]] = None) -> models.Spesa:
     """
     files_data: list of dict { filename, mimetype, data_base64 }
@@ -43,7 +45,6 @@ def get_spesa(db: Session, spesa_id: int) -> Optional[models.Spesa]:
     return db.query(models.Spesa).filter(models.Spesa.id == spesa_id).first()
 
 def list_spese_by_user(db: Session, user_id: int) -> List[models.Spesa]:
-    # ritorna tutte le spese appartenenti alle trasferte del dipendente
     return db.query(models.Spesa).join(models.Trasferta).filter(models.Trasferta.id_dipendente == user_id).all()
 
 def list_all_spese(db: Session) -> List[models.Spesa]:
@@ -60,15 +61,59 @@ def delete_spesa_file(db: Session, file_id: int) -> bool:
     db.commit()
     return True
 
-# Utility helper: convert UploadFile bytes -> base64 dict
 def file_to_base64_dict(uploaded_file) -> dict:
     """
-    uploaded_file is a starlette UploadFile
+    uploaded_file: starlette UploadFile
     returns dict: { filename, mimetype, data }
     """
     content = uploaded_file.file.read()
     if isinstance(content, str):
-        # ensure bytes
         content = content.encode("utf-8")
     b64 = base64.b64encode(content).decode("utf-8")
     return {"filename": uploaded_file.filename, "mimetype": uploaded_file.content_type, "data": b64}
+
+# =========================
+# Prenotazioni CRUD
+# =========================
+
+UPLOAD_DIR = "uploads/biglietti"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+def save_prenotazione_file(uploaded_file) -> str:
+    """
+    Salva il file sul filesystem e ritorna il percorso completo
+    """
+    filepath = os.path.join(UPLOAD_DIR, uploaded_file.filename)
+    with open(filepath, "wb") as buffer:
+        shutil.copyfileobj(uploaded_file.file, buffer)
+    return filepath
+
+def create_prenotazione(db: Session, prenotazione_in: schemas.PrenotazioneCreate, file_biglietto: Optional = None) -> models.Prenotazione:
+    """
+    Crea una prenotazione e salva eventuale file
+    """
+    filepath = None
+    if file_biglietto:
+        filepath = save_prenotazione_file(file_biglietto)
+
+    prenotazione = models.Prenotazione(
+        id_trasferta=prenotazione_in.id_trasferta,
+        tipo_mezzo=prenotazione_in.tipo_mezzo,
+        fornitore=prenotazione_in.fornitore,
+        costo=prenotazione_in.costo,
+        dettagli=prenotazione_in.dettagli,
+        file_biglietto=filepath
+    )
+    db.add(prenotazione)
+    db.commit()
+    db.refresh(prenotazione)
+    return prenotazione
+
+def get_prenotazione(db: Session, prenotazione_id: int) -> Optional[models.Prenotazione]:
+    return db.query(models.Prenotazione).filter(models.Prenotazione.id == prenotazione_id).first()
+
+def list_prenotazioni_by_user(db: Session, user_id: int) -> List[models.Prenotazione]:
+    return db.query(models.Prenotazione).join(models.Trasferta).filter(models.Trasferta.id_dipendente == user_id).all()
+
+def list_all_prenotazioni(db: Session) -> List[models.Prenotazione]:
+    return db.query(models.Prenotazione).all()
