@@ -24,6 +24,17 @@ class TipoMezzoEnum(str, enum.Enum):
     auto = "auto"
     altro = "altro"
 
+# Nuovo enum per tipo di alloggio
+class TipoAlloggioEnum(str, enum.Enum):
+    hotel = "Hotel"
+    bnb = "Bed & Breakfast"
+    ostello = "Ostello"
+    appartamento = "Appartamento"
+    casa_vacanze = "Casa vacanze"
+    agriturismo = "Agriturismo"
+    guesthouse = "Guesthouse"
+    altro = "Altro"
+
 # =============================
 # MODELS
 # =============================
@@ -71,7 +82,7 @@ class Spesa(Base):
     categoria = Column(String, nullable=False)
     importo = Column(Float, nullable=False)
     valuta = Column(String, default="EUR")
-    tipo_scontrino = Column(String, default="altro", nullable=False)  # nuova colonna
+    tipo_scontrino = Column(String, default="altro", nullable=False)
     file_scontrino = Column(String, nullable=True)
     data_spesa = Column(Date, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -99,11 +110,19 @@ class Prenotazione(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     id_trasferta = Column(Integer, ForeignKey("trasferte.id"))
-    tipo_mezzo = Column(Enum(TipoMezzoEnum), nullable=False)
+    
+    # Trasporto
+    tipo_mezzo = Column(Enum(TipoMezzoEnum), nullable=True)
     fornitore = Column(String, nullable=True)
     costo = Column(Float, nullable=True)
     dettagli = Column(String, nullable=True)
     file_biglietto = Column(String, nullable=True)
+    
+    # Alloggio
+    tipo_alloggio = Column(Enum(TipoAlloggioEnum), nullable=True)
+    nome_struttura = Column(String, nullable=True)
+    costo_alloggio = Column(Float, nullable=True)
+
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

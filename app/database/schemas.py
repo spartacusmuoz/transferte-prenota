@@ -5,6 +5,7 @@ from app.database.models import (
     RuoloEnum,
     StatoTrasfertaEnum,
     TipoMezzoEnum,
+    TipoAlloggioEnum,  # import del nuovo enum
 )
 
 # ============================
@@ -73,7 +74,6 @@ class TrasfertaUpdate(BaseModel):
     note_dipendente: Optional[str] = None
     note_segreteria: Optional[str] = None
 
-
 # ============================
 # SPESA - FILE MULTIPLI
 # ============================
@@ -88,7 +88,6 @@ class SpesaFileResponse(SpesaFileBase):
     class Config:
         orm_mode = True
 
-
 # ============================
 # SPESA
 # ============================
@@ -97,7 +96,7 @@ class SpesaBase(BaseModel):
     categoria: str
     importo: float
     valuta: str = "EUR"
-    tipo_scontrino: str  # <-- cambiato da Enum a stringa
+    tipo_scontrino: str
     data_spesa: date
 
 class SpesaCreate(SpesaBase):
@@ -107,7 +106,7 @@ class SpesaRead(SpesaBase):
     id: int
     created_at: datetime
     updated_at: datetime
-    files: List[SpesaFileResponse] = []  # allegati multipli
+    files: List[SpesaFileResponse] = []
 
     class Config:
         orm_mode = True
@@ -116,21 +115,24 @@ class SpesaUpdate(BaseModel):
     categoria: Optional[str] = None
     importo: Optional[float] = None
     valuta: Optional[str] = None
-    tipo_scontrino: Optional[str] = None  # <-- cambiato da Enum a stringa
+    tipo_scontrino: Optional[str] = None
     data_spesa: Optional[date] = None
-
-
 
 # ============================
 # PRENOTAZIONE
 # ============================
 class PrenotazioneBase(BaseModel):
     id_trasferta: int
-    tipo_mezzo: TipoMezzoEnum
+    tipo_mezzo: Optional[TipoMezzoEnum] = None
     fornitore: Optional[str] = None
     costo: Optional[float] = None
     dettagli: Optional[str] = None
     file_biglietto: Optional[str] = None
+
+    # Nuovi campi per alloggio
+    tipo_alloggio: Optional[TipoAlloggioEnum] = None
+    nome_struttura: Optional[str] = None
+    costo_alloggio: Optional[float] = None
 
 class PrenotazioneCreate(PrenotazioneBase):
     pass
@@ -150,6 +152,10 @@ class PrenotazioneUpdate(BaseModel):
     dettagli: Optional[str] = None
     file_biglietto: Optional[str] = None
 
+    # Campi aggiornabili per alloggio
+    tipo_alloggio: Optional[TipoAlloggioEnum] = None
+    nome_struttura: Optional[str] = None
+    costo_alloggio: Optional[float] = None
 
 # ============================
 # ADMIN SCHEMAS
