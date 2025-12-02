@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import auth, transfers, expenses, bookings, admin
+from app.routers import auth, transfers, expenses, bookings, admin, cities, hotels
 from app.database.session import create_tables
+from app.routers import hotel_suggeriti
 
 app = FastAPI(
     title="Applicazione Trasferte",
@@ -29,6 +30,9 @@ app.include_router(transfers.router)
 app.include_router(expenses.router)
 app.include_router(bookings.router)
 app.include_router(admin.router)
+app.include_router(cities.router)
+app.include_router(hotels.router)
+app.include_router(hotel_suggeriti.router)
 
 # ======================================
 # CREAZIONE TABELLE AUTOMATICA ALL'AVVIO

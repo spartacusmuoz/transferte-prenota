@@ -5,7 +5,7 @@ from app.database.models import (
     RuoloEnum,
     StatoTrasfertaEnum,
     TipoMezzoEnum,
-    TipoAlloggioEnum,  # import del nuovo enum
+    TipoAlloggioEnum,
 )
 
 # ============================
@@ -38,6 +38,7 @@ class DipendenteUpdate(BaseModel):
     area_lavoro: Optional[str] = None
     ruolo: Optional[RuoloEnum] = None
     password: Optional[str] = None
+
 
 # ============================
 # TRASFERTA
@@ -74,19 +75,21 @@ class TrasfertaUpdate(BaseModel):
     note_dipendente: Optional[str] = None
     note_segreteria: Optional[str] = None
 
+
 # ============================
-# SPESA - FILE MULTIPLI
+# SPESA FILE
 # ============================
 class SpesaFileBase(BaseModel):
     filename: str
     mimetype: Optional[str] = None
-    data: str  # base64 del file
+    data: str  # base64
 
 class SpesaFileResponse(SpesaFileBase):
     id: int
 
     class Config:
         orm_mode = True
+
 
 # ============================
 # SPESA
@@ -118,21 +121,29 @@ class SpesaUpdate(BaseModel):
     tipo_scontrino: Optional[str] = None
     data_spesa: Optional[date] = None
 
+
 # ============================
 # PRENOTAZIONE
 # ============================
 class PrenotazioneBase(BaseModel):
     id_trasferta: int
+
+    # Trasporto
     tipo_mezzo: Optional[TipoMezzoEnum] = None
     fornitore: Optional[str] = None
     costo: Optional[float] = None
     dettagli: Optional[str] = None
     file_biglietto: Optional[str] = None
 
-    # Nuovi campi per alloggio
+    # Alloggio
     tipo_alloggio: Optional[TipoAlloggioEnum] = None
     nome_struttura: Optional[str] = None
+    citta: Optional[str] = None             # <<< AGGIUNTO
     costo_alloggio: Optional[float] = None
+    indirizzo: Optional[str] = None
+    valutazione: Optional[float] = None
+    numero_recensioni: Optional[int] = None
+    link_hotel: Optional[str] = None
 
 class PrenotazioneCreate(PrenotazioneBase):
     pass
@@ -152,13 +163,19 @@ class PrenotazioneUpdate(BaseModel):
     dettagli: Optional[str] = None
     file_biglietto: Optional[str] = None
 
-    # Campi aggiornabili per alloggio
+    # Alloggio
     tipo_alloggio: Optional[TipoAlloggioEnum] = None
     nome_struttura: Optional[str] = None
+    citta: Optional[str] = None             # <<< AGGIUNTO
     costo_alloggio: Optional[float] = None
+    indirizzo: Optional[str] = None
+    valutazione: Optional[float] = None
+    numero_recensioni: Optional[int] = None
+    link_hotel: Optional[str] = None
+
 
 # ============================
-# ADMIN SCHEMAS
+# ADMIN
 # ============================
 class PasswordResetRequest(BaseModel):
     new_password: str

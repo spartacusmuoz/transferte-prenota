@@ -74,6 +74,12 @@ class Trasferta(Base):
     spese = relationship("Spesa", back_populates="trasferta")
     prenotazioni = relationship("Prenotazione", back_populates="trasferta")
 
+    hotels_suggeriti = relationship(
+        "HotelSuggerito",
+        back_populates="trasferta",
+        cascade="all, delete"
+    )
+
 class Spesa(Base):
     __tablename__ = "spese"
 
@@ -120,10 +126,35 @@ class Prenotazione(Base):
     
     # Alloggio
     tipo_alloggio = Column(Enum(TipoAlloggioEnum), nullable=True)
-    nome_struttura = Column(String, nullable=True)
+    nome_struttura = Column(String, nullable=True)  # nome hotel
+    citta = Column(String, nullable=True)           # NUOVO CAMPO
     costo_alloggio = Column(Float, nullable=True)
-
+    indirizzo = Column(String, nullable=True)
+    valutazione = Column(Float, nullable=True)
+    numero_recensioni = Column(Integer, nullable=True)
+    link_hotel = Column(String, nullable=True)
+    
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     trasferta = relationship("Trasferta", back_populates="prenotazioni")
+
+from sqlalchemy import Column, Integer, String, Float, ForeignKey
+from sqlalchemy.orm import relationship
+from app.database.base import Base
+
+class HotelSuggerito(Base):
+    __tablename__ = "hotel_suggeriti"
+    __table_args__ = {"extend_existing": True}
+
+    id = Column(Integer, primary_key=True, index=True)
+    id_trasferta = Column(Integer, ForeignKey("trasferte.id", ondelete="CASCADE"))
+    nome = Column(String, nullable=False)
+    lat = Column(Float, nullable=False)
+    lon = Column(Float, nullable=False)
+    indirizzo = Column(String, nullable=True)
+    citta = Column(String, nullable=False)
+
+    trasferta = relationship("Trasferta", back_populates="hotels_suggeriti")
+
+

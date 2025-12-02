@@ -41,17 +41,22 @@ def create_spesa(db: Session, spesa_in: schemas.SpesaCreate, creator_id: int, fi
     db.refresh(spesa)
     return spesa
 
+
 def get_spesa(db: Session, spesa_id: int) -> Optional[models.Spesa]:
     return db.query(models.Spesa).filter(models.Spesa.id == spesa_id).first()
+
 
 def list_spese_by_user(db: Session, user_id: int) -> List[models.Spesa]:
     return db.query(models.Spesa).join(models.Trasferta).filter(models.Trasferta.id_dipendente == user_id).all()
 
+
 def list_all_spese(db: Session) -> List[models.Spesa]:
     return db.query(models.Spesa).all()
 
+
 def get_spesa_file(db: Session, file_id: int) -> Optional[models.SpesaFile]:
     return db.query(models.SpesaFile).filter(models.SpesaFile.id == file_id).first()
+
 
 def delete_spesa_file(db: Session, file_id: int) -> bool:
     file_rec = db.query(models.SpesaFile).filter(models.SpesaFile.id == file_id).first()
@@ -60,6 +65,7 @@ def delete_spesa_file(db: Session, file_id: int) -> bool:
     db.delete(file_rec)
     db.commit()
     return True
+
 
 def file_to_base64_dict(uploaded_file) -> dict:
     """
@@ -72,12 +78,14 @@ def file_to_base64_dict(uploaded_file) -> dict:
     b64 = base64.b64encode(content).decode("utf-8")
     return {"filename": uploaded_file.filename, "mimetype": uploaded_file.content_type, "data": b64}
 
+
 # =========================
 # Prenotazioni CRUD
 # =========================
 
 UPLOAD_DIR = "uploads/biglietti"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
+
 
 def save_prenotazione_file(uploaded_file) -> str:
     """
@@ -88,9 +96,10 @@ def save_prenotazione_file(uploaded_file) -> str:
         shutil.copyfileobj(uploaded_file.file, buffer)
     return filepath
 
+
 def create_prenotazione(db: Session, prenotazione_in: schemas.PrenotazioneCreate, file_biglietto: Optional = None) -> models.Prenotazione:
     """
-    Crea una prenotazione e salva eventuale file
+    Crea una prenotazione (trasporto o alloggio) e salva eventuale file
     """
     filepath = None
     if file_biglietto:
@@ -98,22 +107,38 @@ def create_prenotazione(db: Session, prenotazione_in: schemas.PrenotazioneCreate
 
     prenotazione = models.Prenotazione(
         id_trasferta=prenotazione_in.id_trasferta,
+
+        # --- Trasporto ---
         tipo_mezzo=prenotazione_in.tipo_mezzo,
         fornitore=prenotazione_in.fornitore,
         costo=prenotazione_in.costo,
         dettagli=prenotazione_in.dettagli,
-        file_biglietto=filepath
+        file_biglietto=filepath,
+
+        # --- Alloggio ---
+        tipo_alloggio=prenotazione_in.tipo_alloggio,
+        nome_struttura=prenotazione_in.nome_struttura,
+        costo_alloggio=prenotazione_in.costo_alloggio,
+        indirizzo=prenotazione_in.indirizzo,
+        valutazione=prenotazione_in.valutazione,
+        numero_recensioni=prenotazione_in.numero_recensioni,
+        link_hotel=prenotazione_in.link_hotel,
+        citta=prenotazione_in.citta
     )
+
     db.add(prenotazione)
     db.commit()
     db.refresh(prenotazione)
     return prenotazione
 
+
 def get_prenotazione(db: Session, prenotazione_id: int) -> Optional[models.Prenotazione]:
     return db.query(models.Prenotazione).filter(models.Prenotazione.id == prenotazione_id).first()
 
+
 def list_prenotazioni_by_user(db: Session, user_id: int) -> List[models.Prenotazione]:
     return db.query(models.Prenotazione).join(models.Trasferta).filter(models.Trasferta.id_dipendente == user_id).all()
+
 
 def list_all_prenotazioni(db: Session) -> List[models.Prenotazione]:
     return db.query(models.Prenotazione).all()
