@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, Date, DateTime, Enum, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, Date, DateTime, Enum, ForeignKey, Boolean,func
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.database.base import Base
@@ -7,6 +7,7 @@ import enum
 # =============================
 # ENUMS
 # =============================
+
 class RuoloEnum(str, enum.Enum):
     dipendente = "dipendente"
     manager = "manager"
@@ -24,7 +25,6 @@ class TipoMezzoEnum(str, enum.Enum):
     auto = "auto"
     altro = "altro"
 
-# Nuovo enum per tipo di alloggio
 class TipoAlloggioEnum(str, enum.Enum):
     hotel = "Hotel"
     bnb = "Bed & Breakfast"
@@ -38,6 +38,7 @@ class TipoAlloggioEnum(str, enum.Enum):
 # =============================
 # MODELS
 # =============================
+
 class Dipendente(Base):
     __tablename__ = "dipendenti"
 
@@ -53,6 +54,7 @@ class Dipendente(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     trasferte = relationship("Trasferta", back_populates="dipendente")
+
 
 class Trasferta(Base):
     __tablename__ = "trasferte"
@@ -80,6 +82,7 @@ class Trasferta(Base):
         cascade="all, delete"
     )
 
+
 class Spesa(Base):
     __tablename__ = "spese"
 
@@ -97,6 +100,7 @@ class Spesa(Base):
     trasferta = relationship("Trasferta", back_populates="spese")
     files = relationship("SpesaFile", back_populates="spesa")
 
+
 class SpesaFile(Base):
     __tablename__ = "spesa_files"
 
@@ -105,43 +109,42 @@ class SpesaFile(Base):
 
     filename = Column(String, nullable=False)
     mimetype = Column(String, nullable=True)
-    data = Column(String, nullable=False)  # base64 per compatibilità SQLite
+    data = Column(String, nullable=False)  # base64
 
     created_at = Column(DateTime, default=datetime.utcnow)
 
     spesa = relationship("Spesa", back_populates="files")
 
+
 class Prenotazione(Base):
     __tablename__ = "prenotazioni"
 
     id = Column(Integer, primary_key=True, index=True)
-    id_trasferta = Column(Integer, ForeignKey("trasferte.id"))
-    
+    id_trasferta = Column(Integer, ForeignKey("trasferte.id"), nullable=False)
+
     # Trasporto
     tipo_mezzo = Column(Enum(TipoMezzoEnum), nullable=True)
     fornitore = Column(String, nullable=True)
     costo = Column(Float, nullable=True)
     dettagli = Column(String, nullable=True)
     file_biglietto = Column(String, nullable=True)
-    
+
     # Alloggio
     tipo_alloggio = Column(Enum(TipoAlloggioEnum), nullable=True)
-    nome_struttura = Column(String, nullable=True)  # nome hotel
-    citta = Column(String, nullable=True)           # NUOVO CAMPO
+    nome_struttura = Column(String, nullable=True)
+    citta = Column(String, nullable=True)
     costo_alloggio = Column(Float, nullable=True)
     indirizzo = Column(String, nullable=True)
     valutazione = Column(Float, nullable=True)
     numero_recensioni = Column(Integer, nullable=True)
     link_hotel = Column(String, nullable=True)
-    
+    hotel_key = Column(String, nullable=True)
+
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     trasferta = relationship("Trasferta", back_populates="prenotazioni")
 
-from sqlalchemy import Column, Integer, String, Float, ForeignKey
-from sqlalchemy.orm import relationship
-from app.database.base import Base
 
 class HotelSuggerito(Base):
     __tablename__ = "hotel_suggeriti"
@@ -149,12 +152,51 @@ class HotelSuggerito(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     id_trasferta = Column(Integer, ForeignKey("trasferte.id", ondelete="CASCADE"))
+    location_id = Column(Integer, ForeignKey("locations.id"), nullable=True)  # nuovo campo
     nome = Column(String, nullable=False)
     lat = Column(Float, nullable=False)
     lon = Column(Float, nullable=False)
     indirizzo = Column(String, nullable=True)
     citta = Column(String, nullable=False)
-
+    hotel_key = Column(String, nullable=True)
+    esiste = Column(Boolean, default=False)
+    
     trasferta = relationship("Trasferta", back_populates="hotels_suggeriti")
+    location = relationship("Location", backref="hotels_suggeriti")
+    
+    # relazione automatica aggiunta dal backref del nuovo modello:
+    # api_params = relationship("HotelApiParams", back_populates="hotel")
 
 
+# ============================================================
+# NUOVO MODELLO: PARAMETRI API XOTELO
+# ============================================================
+
+class HotelApiParams(Base):
+    __tablename__ = "hotel_api_params"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    id_hotel = Column(Integer, ForeignKey("hotel_suggeriti.id", ondelete="CASCADE"), nullable=False)
+    hotel_key = Column(String, nullable=False)
+
+    chk_in = Column(String, nullable=False)
+    chk_out = Column(String, nullable=False)
+    rooms = Column(Integer, default=1)
+    adults = Column(Integer, default=1)
+    currency = Column(String, default="USD")
+    alloggio = Column(String, nullable=True)  # nuovo campo
+    exists_in_db = Column(Boolean, default=False)  # nuovo campo
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    # relazione verso HotelSuggerito
+    hotel = relationship("HotelSuggerito", backref="api_params")
+
+class Location(Base):
+    __tablename__ = "locations"
+
+    id = Column(Integer, primary_key=True, index=True)
+    city_name = Column(String(100), unique=True, nullable=False)
+    location_key = Column(String(100), nullable=False)
+    created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())

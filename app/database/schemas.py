@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, field_validator, EmailStr
 from datetime import date, datetime
 from typing import Optional, List
 from app.database.models import (
@@ -12,31 +12,24 @@ from app.database.models import (
 # DIPENDENTE
 # ============================
 class DipendenteBase(BaseModel):
-    nome: str
-    cognome: str
-    email: EmailStr
-    telefono: Optional[str] = None
-    area_lavoro: Optional[str] = None
-    ruolo: RuoloEnum = RuoloEnum.dipendente
-
-class DipendenteCreate(DipendenteBase):
-    password: str
-
-class DipendenteRead(DipendenteBase):
-    id: int
-    created_at: datetime
-    updated_at: datetime
-
-    class Config:
-        orm_mode = True
-
-class DipendenteUpdate(BaseModel):
     nome: Optional[str] = None
     cognome: Optional[str] = None
     email: Optional[EmailStr] = None
     telefono: Optional[str] = None
     area_lavoro: Optional[str] = None
     ruolo: Optional[RuoloEnum] = None
+
+class DipendenteCreate(DipendenteBase):
+    password: Optional[str] = None
+
+class DipendenteRead(DipendenteBase):
+    id: int
+    created_at: datetime
+    updated_at: datetime
+    class Config:
+        orm_mode = True
+
+class DipendenteUpdate(DipendenteBase):
     password: Optional[str] = None
 
 
@@ -44,13 +37,13 @@ class DipendenteUpdate(BaseModel):
 # TRASFERTA
 # ============================
 class TrasfertaBase(BaseModel):
-    id_dipendente: int
-    data_partenza: date
-    data_rientro: date
-    luogo_destinazione: str
+    id_dipendente: Optional[int] = None
+    data_partenza: Optional[date] = None
+    data_rientro: Optional[date] = None
+    luogo_destinazione: Optional[str] = None
     luogo_extra: Optional[str] = None
     tipo_commessa: Optional[str] = None
-    stato: StatoTrasfertaEnum = StatoTrasfertaEnum.inviata
+    stato: Optional[StatoTrasfertaEnum] = None
     note_dipendente: Optional[str] = None
     note_segreteria: Optional[str] = None
 
@@ -61,32 +54,23 @@ class TrasfertaRead(TrasfertaBase):
     id: int
     created_at: datetime
     updated_at: datetime
-
     class Config:
         orm_mode = True
 
-class TrasfertaUpdate(BaseModel):
-    data_partenza: Optional[date] = None
-    data_rientro: Optional[date] = None
-    luogo_destinazione: Optional[str] = None
-    luogo_extra: Optional[str] = None
-    tipo_commessa: Optional[str] = None
-    stato: Optional[StatoTrasfertaEnum] = None
-    note_dipendente: Optional[str] = None
-    note_segreteria: Optional[str] = None
+class TrasfertaUpdate(TrasfertaBase):
+    pass
 
 
 # ============================
 # SPESA FILE
 # ============================
 class SpesaFileBase(BaseModel):
-    filename: str
+    filename: Optional[str] = None
     mimetype: Optional[str] = None
-    data: str  # base64
+    data: Optional[str] = None
 
 class SpesaFileResponse(SpesaFileBase):
     id: int
-
     class Config:
         orm_mode = True
 
@@ -95,12 +79,12 @@ class SpesaFileResponse(SpesaFileBase):
 # SPESA
 # ============================
 class SpesaBase(BaseModel):
-    id_trasferta: int
-    categoria: str
-    importo: float
-    valuta: str = "EUR"
-    tipo_scontrino: str
-    data_spesa: date
+    id_trasferta: Optional[int] = None
+    categoria: Optional[str] = None
+    importo: Optional[float] = None
+    valuta: Optional[str] = None
+    tipo_scontrino: Optional[str] = None
+    data_spesa: Optional[date] = None
 
 class SpesaCreate(SpesaBase):
     pass
@@ -110,16 +94,11 @@ class SpesaRead(SpesaBase):
     created_at: datetime
     updated_at: datetime
     files: List[SpesaFileResponse] = []
-
     class Config:
         orm_mode = True
 
-class SpesaUpdate(BaseModel):
-    categoria: Optional[str] = None
-    importo: Optional[float] = None
-    valuta: Optional[str] = None
-    tipo_scontrino: Optional[str] = None
-    data_spesa: Optional[date] = None
+class SpesaUpdate(SpesaBase):
+    pass
 
 
 # ============================
@@ -138,12 +117,23 @@ class PrenotazioneBase(BaseModel):
     # Alloggio
     tipo_alloggio: Optional[TipoAlloggioEnum] = None
     nome_struttura: Optional[str] = None
-    citta: Optional[str] = None             # <<< AGGIUNTO
+    citta: Optional[str] = None
     costo_alloggio: Optional[float] = None
     indirizzo: Optional[str] = None
     valutazione: Optional[float] = None
     numero_recensioni: Optional[int] = None
     link_hotel: Optional[str] = None
+    hotel_key: Optional[str] = None
+
+    @field_validator("tipo_alloggio", "tipo_mezzo", mode="before")
+    def empty_string_to_none(cls, v):
+        if v == "":
+            return None
+        return v
+
+    class Config:
+        orm_mode = True
+
 
 class PrenotazioneCreate(PrenotazioneBase):
     pass
@@ -152,7 +142,6 @@ class PrenotazioneRead(PrenotazioneBase):
     id: int
     created_at: datetime
     updated_at: datetime
-
     class Config:
         orm_mode = True
 
@@ -166,19 +155,74 @@ class PrenotazioneUpdate(BaseModel):
     # Alloggio
     tipo_alloggio: Optional[TipoAlloggioEnum] = None
     nome_struttura: Optional[str] = None
-    citta: Optional[str] = None             # <<< AGGIUNTO
+    citta: Optional[str] = None
     costo_alloggio: Optional[float] = None
     indirizzo: Optional[str] = None
     valutazione: Optional[float] = None
     numero_recensioni: Optional[int] = None
     link_hotel: Optional[str] = None
+    hotel_key: Optional[str] = None
 
 
 # ============================
 # ADMIN
 # ============================
 class PasswordResetRequest(BaseModel):
-    new_password: str
+    new_password: Optional[str] = None
 
 class RoleUpdateRequest(BaseModel):
-    ruolo: RuoloEnum
+    ruolo: Optional[RuoloEnum] = None
+
+
+# ============================================================
+# HOTEL API PARAMS (NUOVI SCHEMI)
+# ============================================================
+
+class HotelApiParamsBase(BaseModel):
+    id_hotel: Optional[int] = None
+    hotel_key: Optional[str] = None
+    chk_in: Optional[str] = None
+    chk_out: Optional[str] = None
+    rooms: Optional[int] = 1
+    adults: Optional[int] = 1
+    currency: Optional[str] = "USD"
+
+class HotelApiParamsCreate(HotelApiParamsBase):
+    id_hotel: int
+    hotel_key: str
+    chk_in: str
+    chk_out: str
+    alloggio: Optional[str] = None
+    exists_in_db: Optional[bool] = False
+
+
+class HotelApiParamsRead(HotelApiParamsBase):
+    id: int
+    created_at: datetime
+    alloggio: Optional[str] = None
+    exists_in_db: Optional[bool] = False
+
+    model_config = {
+        "from_attributes": True
+    }
+
+
+
+class HotelApiParamsUpdate(BaseModel):
+    hotel_key: Optional[str] = None
+    chk_in: Optional[str] = None
+    chk_out: Optional[str] = None
+    rooms: Optional[int] = None
+    adults: Optional[int] = None
+    currency: Optional[str] = None
+    alloggio: Optional[str] = None
+    exists_in_db: Optional[bool] = False
+
+
+
+class CityHotelsResponse(BaseModel):
+    city_name: str
+    location_key: str
+
+    class Config:
+        from_attributes = True  # per supportare SQLAlchemy ORM

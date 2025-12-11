@@ -1,8 +1,11 @@
+print(">>> LOADED: suggerimenti_hotel router")
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers import auth, transfers, expenses, bookings, admin, cities, hotels
+from app.routers import hotel_suggeriti, xotelo  # <-- import router Xotelo
 from app.database.session import create_tables
-from app.routers import hotel_suggeriti
+from app.routers import hotel_api_params
 
 app = FastAPI(
     title="Applicazione Trasferte",
@@ -10,8 +13,8 @@ app = FastAPI(
     version="1.0"
 )
 
+# -------------------- CORS --------------------
 origins = [
-    
     "http://localhost:9000",
     "http://127.0.0.1:9000",
 ]
@@ -24,7 +27,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Routers
+# -------------------- Routers --------------------
 app.include_router(auth.router)
 app.include_router(transfers.router)
 app.include_router(expenses.router)
@@ -33,7 +36,8 @@ app.include_router(admin.router)
 app.include_router(cities.router)
 app.include_router(hotels.router)
 app.include_router(hotel_suggeriti.router)
-
+app.include_router(xotelo.router)  # <-- aggiunto qui
+app.include_router(hotel_api_params.router)
 # ======================================
 # CREAZIONE TABELLE AUTOMATICA ALL'AVVIO
 # ======================================
@@ -41,6 +45,7 @@ app.include_router(hotel_suggeriti.router)
 def on_startup():
     create_tables()
 
+# -------------------- Root test --------------------
 @app.get("/")
 def read_root():
     return {"message": "API Trasferte attiva!"}

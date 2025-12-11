@@ -5,11 +5,14 @@ from .base import Base
 # URL del database
 DATABASE_URL = "sqlite:///./db.sqlite3"
 
+
 engine = create_engine(
     DATABASE_URL,
-    connect_args={"check_same_thread": False}  # solo SQLite
+    connect_args={
+        "check_same_thread": False,
+        "timeout": 30  # <--- AGGIUNGERE QUESTO È FONDAMENTALE
+    }
 )
-
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # ======================================
