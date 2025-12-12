@@ -124,6 +124,7 @@ class PrenotazioneBase(BaseModel):
     numero_recensioni: Optional[int] = None
     link_hotel: Optional[str] = None
     hotel_key: Optional[str] = None
+    id_hotel: Optional[int]= None
 
     @field_validator("tipo_alloggio", "tipo_mezzo", mode="before")
     def empty_string_to_none(cls, v):

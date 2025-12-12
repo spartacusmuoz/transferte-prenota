@@ -23,10 +23,10 @@ def upgrade() -> None:
     #op.add_column('hotel_api_params', sa.Column('alloggio', sa.String(), nullable=True))
     
     # Rimuovi la colonna 'allogio' dalla tabella 'hotel_api_params' (se esiste)
-    op.drop_column('hotel_api_params', 'allogio')
-
+    #op.drop_column('hotel_api_params', 'allogio')
+    pass
 def downgrade() -> None:
     # In caso di rollback, rimuovi la colonna 'alloggio' e ripristina 'allogio'
-    op.drop_column('hotel_api_params', 'alloggio')
+    #op.drop_column('hotel_api_params', 'alloggio')
     #op.add_column('hotel_api_params', sa.Column('allogio', sa.String(), nullable=True))
-
+    pass

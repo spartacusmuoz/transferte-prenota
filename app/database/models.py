@@ -139,6 +139,7 @@ class Prenotazione(Base):
     numero_recensioni = Column(Integer, nullable=True)
     link_hotel = Column(String, nullable=True)
     hotel_key = Column(String, nullable=True)
+    id_hotel = Column(Integer, nullable=True)
 
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
