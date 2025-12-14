@@ -147,7 +147,12 @@ def get_params_by_name(hotel_name: str, db: Session = Depends(get_db)):
 # ============================================================
 @router.get("/xotelo/{hotel_id}", response_model=dict)
 def call_xotelo_rates(hotel_id: int, db: Session = Depends(get_db)):
-    params = db.query(HotelApiParams).filter(HotelApiParams.id_hotel == hotel_id).first()
+    params = (
+    db.query(HotelApiParams)
+    .filter(HotelApiParams.id_hotel == hotel_id)
+    .order_by(HotelApiParams.id.desc())  # prende l'ultimo inserito
+    .first()
+)
     if not params:
         raise HTTPException(status_code=404, detail="Parametri hotel non trovati")
     ...

@@ -72,3 +72,47 @@ def update_stato_trasferta(
     db.commit()
     db.refresh(trasferta)
     return trasferta
+# ==============================
+# DIPENDENTE / MANAGER / ADMIN: elimina trasferta
+# ==============================
+@router.delete(
+    "/{trasferta_id}",
+    status_code=status.HTTP_204_NO_CONTENT
+)
+def delete_trasferta(
+    trasferta_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.Dipendente = Depends(
+        require_role(["dipendente", "manager", "admin"])
+    )
+):
+    # 1️⃣ Recupera trasferta
+    trasferta = db.query(models.Trasferta).filter(
+        models.Trasferta.id == trasferta_id
+    ).first()
+
+    if not trasferta:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Trasferta non trovata"
+        )
+
+    # 2️⃣ Controllo permessi
+    # - il dipendente può cancellare SOLO le proprie
+    # - manager/admin possono cancellare tutte
+    if current_user.ruolo == "dipendente" and trasferta.id_dipendente != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Non autorizzato a eliminare questa trasferta"
+        )
+
+    # 3️⃣ Cancella prenotazioni collegate
+    db.query(models.Prenotazione).filter(
+        models.Prenotazione.id_trasferta == trasferta_id
+    ).delete()
+
+    # 4️⃣ Cancella trasferta
+    db.delete(trasferta)
+    db.commit()
+
+    return None
