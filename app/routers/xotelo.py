@@ -209,6 +209,7 @@ def sync_hotel_keys_to_db(
     trasferta_id: int = Query(...),
     db: Session = Depends(get_db)
 ):
+    # Recupera location_key per la città
     location_key = get_location_key(db, city)
     params = {"location_key": location_key, "offset": 0, "limit": 100, "sort": "best_value"}
 
@@ -223,6 +224,7 @@ def sync_hotel_keys_to_db(
     if not hotel_list:
         raise HTTPException(status_code=404, detail="Nessun hotel ricevuto da Xotelo")
 
+    # Recupera gli hotel già presenti nel DB per questa trasferta
     hotel_suggeriti = db.query(HotelSuggerito).filter(
         HotelSuggerito.id_trasferta == trasferta_id
     ).all()
@@ -233,6 +235,7 @@ def sync_hotel_keys_to_db(
             if xotelo_hotel.get("name", "").strip().lower() == hotel.nome.strip().lower():
                 hotel.hotel_key = xotelo_hotel.get("key")
                 hotel.esiste = 1
+                hotel.image_url = xotelo_hotel.get("image")  # 🔥 Qui aggiungiamo l'URL dell'immagine
                 updated_count += 1
                 break
 
@@ -243,6 +246,7 @@ def sync_hotel_keys_to_db(
         "message": "Sincronizzazione delle chiavi completata",
         "updated_count": updated_count
     }
+
 
 
 # ==========================

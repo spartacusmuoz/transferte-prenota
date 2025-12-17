@@ -72,6 +72,26 @@ def update_stato_trasferta(
     db.commit()
     db.refresh(trasferta)
     return trasferta
+
+@router.patch("/{trasferta_id}", response_model=schemas.TrasfertaRead)
+def update_trasferta(
+    trasferta_id: int,
+    trasferta_update: schemas.TrasfertaUpdate,
+    db: Session = Depends(get_db),
+    current_user = Depends(require_role(["dipendente", "manager", "admin"]))
+):
+    trasferta = db.query(models.Trasferta).filter(models.Trasferta.id == trasferta_id).first()
+    if not trasferta:
+        raise HTTPException(status_code=404, detail="Trasferta non trovata")
+    
+    # Aggiorna solo i campi inviati
+    data = trasferta_update.dict(exclude_unset=True)
+    for k, v in data.items():
+        setattr(trasferta, k, v)
+    
+    db.commit()
+    db.refresh(trasferta)
+    return trasferta
 # ==============================
 # DIPENDENTE / MANAGER / ADMIN: elimina trasferta
 # ==============================

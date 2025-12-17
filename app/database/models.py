@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, Date, DateTime, Enum, ForeignKey, Boolean,func
+from sqlalchemy import Column, Integer, String, Float, Date, DateTime, Enum, ForeignKey, Boolean,func,Text
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.database.base import Base
@@ -162,7 +162,7 @@ class HotelSuggerito(Base):
     citta = Column(String, nullable=False)
     hotel_key = Column(String, nullable=True)
     esiste = Column(Boolean, default=False)
-    
+    image_url = Column(Text, nullable=True)  # 🔥 nuova colonna
     trasferta = relationship("Trasferta", back_populates="hotels_suggeriti")
     location = relationship("Location", backref="hotels_suggeriti")
     
