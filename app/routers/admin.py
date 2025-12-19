@@ -81,3 +81,14 @@ def update_user_role(
     db.commit()
     db.refresh(user)
     return user
+# ==============================
+# OTTIENI DATI UTENTE LOGGATO
+# ==============================
+@router.get("/me", response_model=schemas.DipendenteRead)
+def get_current_user(
+    current_user: models.Dipendente = Depends(require_role(["admin", "manager", "dipendente"])),
+):
+    """
+    Restituisce i dati dell'utente loggato (incluso il ruolo)
+    """
+    return current_user

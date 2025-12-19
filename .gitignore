@@ -9,9 +9,8 @@ __pycache__/
 *.pyo
 *.pyd
 
-# SQLite database locali
-*.sqlite3
-db.sqlite3
+
+
 
 # Logs
 *.log
